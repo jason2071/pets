@@ -20,8 +20,23 @@ func main() {
 		log.Fatalf("database connect: %v", err)
 	}
 
-	if err := db.AutoMigrate(&domain.Pet{}, &domain.Account{}); err != nil {
-		log.Fatalf("auto migrate: %v", err)
+	// Hybrid migration strategy:
+	//   - dev:  AUTO_MIGRATE=true  -> GORM AutoMigrate shapes the schema from structs
+	//   - prod: AUTO_MIGRATE=false -> schema is owned by SQL migrations (make migrate-up)
+	// Never let both manage the same table at once.
+	if cfg.AutoMigrate {
+		// Order matters for foreign keys: parents (accounts, clinics) before dependents.
+		if err := db.AutoMigrate(
+			&domain.Account{},
+			&domain.Clinic{},
+			&domain.Doctor{},
+			&domain.Pet{},
+		); err != nil {
+			log.Fatalf("auto migrate: %v", err)
+		}
+		log.Println("schema: GORM AutoMigrate applied")
+	} else {
+		log.Println("schema: AutoMigrate disabled, expecting SQL migrations")
 	}
 
 	petRepo := repository.NewPetRepository(db)

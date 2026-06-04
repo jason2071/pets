@@ -16,6 +16,9 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBSSLMode  string
+	// AutoMigrate runs GORM AutoMigrate on startup. Enable in dev for fast
+	// iteration; disable in production and rely on SQL migrations instead.
+	AutoMigrate bool
 }
 
 // Load reads configuration from a .env file (if present) and the environment.
@@ -23,13 +26,14 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		Port:       getEnv("PORT", "8080"),
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "postgres"),
-		DBName:     getEnv("DB_NAME", "pets"),
-		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
+		Port:        getEnv("PORT", "8080"),
+		DBHost:      getEnv("DB_HOST", "localhost"),
+		DBPort:      getEnv("DB_PORT", "5432"),
+		DBUser:      getEnv("DB_USER", "postgres"),
+		DBPassword:  getEnv("DB_PASSWORD", "postgres"),
+		DBName:      getEnv("DB_NAME", "pets"),
+		DBSSLMode:   getEnv("DB_SSLMODE", "disable"),
+		AutoMigrate: getEnv("AUTO_MIGRATE", "true") == "true",
 	}
 }
 

@@ -6,6 +6,7 @@ import "time"
 type Pet struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	OwnerID   *uint     `gorm:"index" json:"owner_id,omitempty"`
+	Owner     *Account  `gorm:"constraint:OnDelete:SET NULL" json:"owner,omitempty"`
 	Name      string    `gorm:"not null" json:"name"`
 	Species   string    `gorm:"not null" json:"species"`
 	Breed     string    `json:"breed,omitempty"`
