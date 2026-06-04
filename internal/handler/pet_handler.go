@@ -71,7 +71,7 @@ func (h *PetHandler) List(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, pets)
+	c.JSON(http.StatusOK, gin.H{"data": pets})
 }
 
 func (h *PetHandler) Get(c *gin.Context) {
