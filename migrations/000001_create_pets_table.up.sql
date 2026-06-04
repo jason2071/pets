@@ -1,4 +1,4 @@
--- users
+-- accounts
 CREATE TABLE IF NOT EXISTS accounts (
     id            BIGSERIAL PRIMARY KEY,
     email         TEXT        NOT NULL UNIQUE,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_accounts_role ON accounts(role);
 
 -- clinics
 CREATE TABLE IF NOT EXISTS clinics (
@@ -39,7 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_doctors_specialty ON doctors(specialty);
 -- pets
 CREATE TABLE IF NOT EXISTS pets (
     id          BIGSERIAL PRIMARY KEY,
-    owner_id    BIGINT      REFERENCES users(id) ON DELETE SET NULL,
+    owner_id    BIGINT      REFERENCES accounts(id) ON DELETE SET NULL,
     name        TEXT        NOT NULL,
     species     TEXT        NOT NULL,
     breed       TEXT        NOT NULL DEFAULT '',
