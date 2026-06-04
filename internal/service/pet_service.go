@@ -36,6 +36,7 @@ func (s *PetService) Update(id uint, in *domain.Pet) (*domain.Pet, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.OwnerID = in.OwnerID
 	p.Name = in.Name
 	p.Species = in.Species
 	p.Breed = in.Breed

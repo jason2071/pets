@@ -22,6 +22,7 @@ func NewPetHandler(svc *service.PetService) *PetHandler {
 }
 
 type petRequest struct {
+	OwnerID *uint  `json:"owner_id"`
 	Name    string `json:"name" binding:"required"`
 	Species string `json:"species" binding:"required"`
 	Breed   string `json:"breed"`
@@ -46,7 +47,7 @@ func (h *PetHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	p := &domain.Pet{Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
+	p := &domain.Pet{OwnerID: req.OwnerID, Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
 	if err := h.svc.Create(p); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,7 +89,7 @@ func (h *PetHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	in := &domain.Pet{Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
+	in := &domain.Pet{OwnerID: req.OwnerID, Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
 	p, err := h.svc.Update(id, in)
 	if err != nil {
 		h.respondError(c, err)

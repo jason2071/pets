@@ -5,6 +5,7 @@ import "time"
 // Pet is the core domain entity.
 type Pet struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
+	OwnerID   *uint     `gorm:"index" json:"owner_id,omitempty"`
 	Name      string    `gorm:"not null" json:"name"`
 	Species   string    `gorm:"not null" json:"species"`
 	Breed     string    `json:"breed,omitempty"`
