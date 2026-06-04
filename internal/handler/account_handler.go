@@ -41,9 +41,11 @@ func (h *AccountHandler) Create(c *gin.Context) {
 		Password: req.Password,
 		Name:     req.Name,
 	}
+
 	if err := h.account.Create(acc); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, acc)
+
+	c.JSON(http.StatusCreated, "Register Complete")
 }

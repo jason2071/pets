@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("database connect: %v", err)
 	}
 
-	if err := db.AutoMigrate(&domain.Pet{}); err != nil {
+	if err := db.AutoMigrate(&domain.Pet{}, &domain.Account{}); err != nil {
 		log.Fatalf("auto migrate: %v", err)
 	}
 

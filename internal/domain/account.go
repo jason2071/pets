@@ -5,7 +5,7 @@ import "time"
 type Account struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Email     string    `gorm:"not null" json:"email"`
-	Password  string    `gorm:"not null" json:"password"`
+	Password  string    `gorm:"not null" json:"-"`
 	Name      string    `gorm:"not null" json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
