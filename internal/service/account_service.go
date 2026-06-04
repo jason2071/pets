@@ -23,6 +23,7 @@ func (s *AccountService) Create(acc *domain.Account) error {
 		return err
 	}
 	acc.Password = string(hash)
+
 	return s.repo.Create(acc)
 }
 

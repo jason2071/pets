@@ -1,10 +1,9 @@
 -- users
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS accounts (
     id            BIGSERIAL PRIMARY KEY,
     email         TEXT        NOT NULL UNIQUE,
     password_hash TEXT        NOT NULL,
     full_name     TEXT        NOT NULL,
-    phone         TEXT        NOT NULL DEFAULT '',
     role          TEXT        NOT NULL DEFAULT 'owner',
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
