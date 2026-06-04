@@ -22,7 +22,11 @@ func (r *accountRepository) FindById(id uint) (*domain.Account, error) {
 }
 
 func (r *accountRepository) FindByEmail(email string) (*domain.Account, error) {
-	return nil, nil
+	var acc domain.Account
+	if err := r.db.Where("email = ?", email).First(&acc).Error; err != nil {
+		return nil, err
+	}
+	return &acc, nil
 }
 
 func (r *accountRepository) Update(a *domain.Account) error {
