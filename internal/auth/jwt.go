@@ -13,6 +13,7 @@ var ErrInvalidToken = errors.New("invalid token")
 
 // Claims is the JWT payload for an authenticated account.
 type Claims struct {
+	Name  string `json:"name"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
 	jwt.RegisteredClaims
@@ -33,9 +34,10 @@ func NewTokenManager(secret string, expiryHours int) *TokenManager {
 }
 
 // Generate signs a token for the given account.
-func (m *TokenManager) Generate(accountID uint, email, role string) (string, error) {
+func (m *TokenManager) Generate(accountID uint, name, email, role string) (string, error) {
 	now := time.Now()
 	claims := Claims{
+		Name:  name,
 		Email: email,
 		Role:  role,
 		RegisteredClaims: jwt.RegisteredClaims{

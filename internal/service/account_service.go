@@ -58,5 +58,5 @@ func (s *AccountService) Login(email, plain string) (string, error) {
 		return "", ErrInvalidCredentials
 	}
 
-	return s.tokens.Generate(found.ID, found.Email, found.Role)
+	return s.tokens.Generate(found.ID, found.Email, found.Name, found.Role)
 }
