@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/jason2071/pets/internal/auth"
 	"github.com/jason2071/pets/internal/config"
 	"github.com/jason2071/pets/internal/database"
 	"github.com/jason2071/pets/internal/domain"
@@ -43,8 +44,9 @@ func main() {
 	petSvc := service.NewPetService(petRepo)
 	petHandler := handler.NewPetHandler(petSvc)
 
+	tokens := auth.NewTokenManager(cfg.JWTSecret, cfg.JWTExpiryHours)
 	accRepo := repository.NewAccountRepository(db)
-	accSvc := service.NewAccountService(accRepo)
+	accSvc := service.NewAccountService(accRepo, tokens)
 	accHandler := handler.NewAccountHandler(accSvc)
 
 	r := server.NewRouter(petHandler, accHandler)

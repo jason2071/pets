@@ -68,19 +68,15 @@ func (h *AccountHandler) Login(c *gin.Context) {
 		return
 	}
 
-	acc := &domain.Account{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	if err := h.account.Login(acc); err != nil {
-		if errors.Is(err, service.ErrAccountNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": service.ErrAccountNotFound.Error()})
+	token, err := h.account.Login(req.Email, req.Password)
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidCredentials) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": service.ErrInvalidCredentials.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, "token")
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

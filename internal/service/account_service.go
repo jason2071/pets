@@ -3,22 +3,25 @@ package service
 import (
 	"errors"
 
+	"github.com/jason2071/pets/internal/auth"
 	"github.com/jason2071/pets/internal/domain"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrAccountNotFound = errors.New("account not found")
-	ErrEmailExists     = errors.New("email already registered")
+	ErrAccountNotFound    = errors.New("account not found")
+	ErrEmailExists        = errors.New("email already registered")
+	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 type AccountService struct {
-	repo domain.AccountRepository
+	repo   domain.AccountRepository
+	tokens *auth.TokenManager
 }
 
-func NewAccountService(repo domain.AccountRepository) *AccountService {
-	return &AccountService{repo: repo}
+func NewAccountService(repo domain.AccountRepository, tokens *auth.TokenManager) *AccountService {
+	return &AccountService{repo: repo, tokens: tokens}
 }
 
 func (s *AccountService) Create(acc *domain.Account) error {
@@ -42,22 +45,18 @@ func (s *AccountService) VerifyPassword(acc *domain.Account, plain string) bool 
 	return bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(plain)) == nil
 }
 
-// Login authenticates by email + plaintext password. acc carries the input
-// (Email + plaintext Password); on success it is replaced with the stored
-// account (id, hashed password, etc.).
-func (s *AccountService) Login(acc *domain.Account) error {
-	plain := acc.Password
-
-	found, err := s.repo.FindByEmail(acc.Email)
+// Login authenticates by email + plaintext password and returns a signed JWT.
+// Both "no such email" and "wrong password" return ErrInvalidCredentials to
+// avoid user enumeration.
+func (s *AccountService) Login(email, plain string) (string, error) {
+	found, err := s.repo.FindByEmail(email)
 	if err != nil {
-		// Unify "no such email" and "wrong password" to avoid user enumeration.
-		return ErrAccountNotFound
+		return "", ErrInvalidCredentials
 	}
 
 	if !s.VerifyPassword(found, plain) {
-		return ErrAccountNotFound
+		return "", ErrInvalidCredentials
 	}
 
-	*acc = *found
-	return nil
+	return s.tokens.Generate(found.ID, found.Email, found.Role)
 }

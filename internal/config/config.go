@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -19,6 +20,9 @@ type Config struct {
 	// AutoMigrate runs GORM AutoMigrate on startup. Enable in dev for fast
 	// iteration; disable in production and rely on SQL migrations instead.
 	AutoMigrate bool
+	// JWTSecret signs auth tokens. JWTExpiryHours is the token lifetime.
+	JWTSecret      string
+	JWTExpiryHours int
 }
 
 // Load reads configuration from a .env file (if present) and the environment.
@@ -33,7 +37,9 @@ func Load() *Config {
 		DBPassword:  getEnv("DB_PASSWORD", "postgres"),
 		DBName:      getEnv("DB_NAME", "pets"),
 		DBSSLMode:   getEnv("DB_SSLMODE", "disable"),
-		AutoMigrate: getEnv("AUTO_MIGRATE", "true") == "true",
+		AutoMigrate:    getEnv("AUTO_MIGRATE", "true") == "true",
+		JWTSecret:      getEnv("JWT_SECRET", "dev-secret-change-me"),
+		JWTExpiryHours: getEnvInt("JWT_EXPIRY_HOURS", 24),
 	}
 }
 
@@ -48,6 +54,15 @@ func (c *Config) DSN() string {
 func getEnv(key, fallback string) string {
 	if v, ok := os.LookupEnv(key); ok && v != "" {
 		return v
+	}
+	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	if v, ok := os.LookupEnv(key); ok && v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
 	}
 	return fallback
 }
