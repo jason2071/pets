@@ -8,7 +8,7 @@ import (
 )
 
 // NewRouter builds the Gin engine and registers all routes.
-func NewRouter(petHandler *handler.PetHandler) *gin.Engine {
+func NewRouter(petHandler *handler.PetHandler, accHandler *handler.AccountHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context) {
@@ -17,6 +17,7 @@ func NewRouter(petHandler *handler.PetHandler) *gin.Engine {
 
 	api := r.Group("/api/v1")
 	petHandler.Register(api)
+	accHandler.Register(api)
 
 	return r
 }

@@ -28,7 +28,11 @@ func main() {
 	petSvc := service.NewPetService(petRepo)
 	petHandler := handler.NewPetHandler(petSvc)
 
-	r := server.NewRouter(petHandler)
+	accRepo := repository.NewAccountRepository(db)
+	accSvc := service.NewAccountService(accRepo)
+	accHandler := handler.NewAccountHandler(accSvc)
+
+	r := server.NewRouter(petHandler, accHandler)
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)

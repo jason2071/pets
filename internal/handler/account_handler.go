@@ -30,8 +30,6 @@ func (h *AccountHandler) Register(rg *gin.RouterGroup) {
 }
 
 func (h *AccountHandler) Create(c *gin.Context) {
-	c.JSON(http.StatusOK, "complete")
-
 	var req accountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
