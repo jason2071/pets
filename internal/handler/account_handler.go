@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,6 +44,10 @@ func (h *AccountHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.account.Create(acc); err != nil {
+		if errors.Is(err, service.ErrEmailExists) {
+			c.JSON(http.StatusConflict, gin.H{"error": service.ErrEmailExists.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

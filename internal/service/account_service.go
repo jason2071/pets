@@ -5,9 +5,13 @@ import (
 
 	"github.com/jason2071/pets/internal/domain"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
-var ErrAccountNotFound = errors.New("account not found")
+var (
+	ErrAccountNotFound = errors.New("account not found")
+	ErrEmailExists     = errors.New("email already registered")
+)
 
 type AccountService struct {
 	repo domain.AccountRepository
@@ -24,7 +28,13 @@ func (s *AccountService) Create(acc *domain.Account) error {
 	}
 	acc.Password = string(hash)
 
-	return s.repo.Create(acc)
+	if err := s.repo.Create(acc); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return ErrEmailExists
+		}
+		return err
+	}
+	return nil
 }
 
 // VerifyPassword checks a plaintext password against the stored bcrypt hash.
