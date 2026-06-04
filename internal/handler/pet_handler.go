@@ -133,7 +133,7 @@ func (h *PetHandler) Delete(c *gin.Context) {
 		h.respondError(c, err)
 		return
 	}
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, gin.H{"message": "delete complete"})
 }
 
 func (h *PetHandler) respondError(c *gin.Context, err error) {
