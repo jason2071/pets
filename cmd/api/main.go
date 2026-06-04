@@ -49,7 +49,7 @@ func main() {
 	accSvc := service.NewAccountService(accRepo, tokens)
 	accHandler := handler.NewAccountHandler(accSvc)
 
-	r := server.NewRouter(petHandler, accHandler)
+	r := server.NewRouter(petHandler, accHandler, tokens)
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)
