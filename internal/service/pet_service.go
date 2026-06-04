@@ -23,20 +23,21 @@ func (s *PetService) Create(p *domain.Pet) error {
 	return s.repo.Create(p)
 }
 
-func (s *PetService) List() ([]domain.Pet, error) {
-	return s.repo.FindAll()
+func (s *PetService) List(ownerID uint) ([]domain.Pet, error) {
+	return s.repo.FindAllByOwner(ownerID)
 }
 
-func (s *PetService) Get(id uint) (*domain.Pet, error) {
-	return s.repo.FindByID(id)
+func (s *PetService) Get(id, ownerID uint) (*domain.Pet, error) {
+	return s.repo.FindByIDAndOwner(id, ownerID)
 }
 
-func (s *PetService) Update(id uint, in *domain.Pet) (*domain.Pet, error) {
-	p, err := s.repo.FindByID(id)
+// Update modifies a pet the caller owns. Ownership is fixed; only mutable
+// fields are changed.
+func (s *PetService) Update(id, ownerID uint, in *domain.Pet) (*domain.Pet, error) {
+	p, err := s.repo.FindByIDAndOwner(id, ownerID)
 	if err != nil {
 		return nil, err
 	}
-	p.OwnerID = in.OwnerID
 	p.Name = in.Name
 	p.Species = in.Species
 	p.Breed = in.Breed
@@ -47,6 +48,6 @@ func (s *PetService) Update(id uint, in *domain.Pet) (*domain.Pet, error) {
 	return p, nil
 }
 
-func (s *PetService) Delete(id uint) error {
-	return s.repo.Delete(id)
+func (s *PetService) Delete(id, ownerID uint) error {
+	return s.repo.DeleteByOwner(id, ownerID)
 }

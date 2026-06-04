@@ -15,11 +15,12 @@ type Pet struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// PetRepository defines persistence operations for pets.
+// PetRepository defines persistence operations for pets. Reads, updates, and
+// deletes are scoped by owner so accounts only touch their own pets.
 type PetRepository interface {
 	Create(p *Pet) error
-	FindAll() ([]Pet, error)
-	FindByID(id uint) (*Pet, error)
+	FindAllByOwner(ownerID uint) ([]Pet, error)
+	FindByIDAndOwner(id, ownerID uint) (*Pet, error)
 	Update(p *Pet) error
-	Delete(id uint) error
+	DeleteByOwner(id, ownerID uint) error
 }

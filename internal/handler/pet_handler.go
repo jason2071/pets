@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jason2071/pets/internal/auth"
 	"github.com/jason2071/pets/internal/domain"
 	"github.com/jason2071/pets/internal/service"
 	"gorm.io/gorm"
@@ -22,7 +23,6 @@ func NewPetHandler(svc *service.PetService) *PetHandler {
 }
 
 type petRequest struct {
-	OwnerID *uint  `json:"owner_id"`
 	Name    string `json:"name" binding:"required"`
 	Species string `json:"species" binding:"required"`
 	Breed   string `json:"breed"`
@@ -47,7 +47,12 @@ func (h *PetHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	p := &domain.Pet{OwnerID: req.OwnerID, Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
+	ownerID, ok := accountIDFromToken(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token subject"})
+		return
+	}
+	p := &domain.Pet{OwnerID: &ownerID, Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
 	if err := h.svc.Create(p); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -56,7 +61,12 @@ func (h *PetHandler) Create(c *gin.Context) {
 }
 
 func (h *PetHandler) List(c *gin.Context) {
-	pets, err := h.svc.List()
+	ownerID, ok := accountIDFromToken(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token subject"})
+		return
+	}
+	pets, err := h.svc.List(ownerID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -70,7 +80,12 @@ func (h *PetHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
-	p, err := h.svc.Get(id)
+	ownerID, ok := accountIDFromToken(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token subject"})
+		return
+	}
+	p, err := h.svc.Get(id, ownerID)
 	if err != nil {
 		h.respondError(c, err)
 		return
@@ -89,8 +104,13 @@ func (h *PetHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	in := &domain.Pet{OwnerID: req.OwnerID, Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
-	p, err := h.svc.Update(id, in)
+	ownerID, ok := accountIDFromToken(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token subject"})
+		return
+	}
+	in := &domain.Pet{Name: req.Name, Species: req.Species, Breed: req.Breed, Age: req.Age}
+	p, err := h.svc.Update(id, ownerID, in)
 	if err != nil {
 		h.respondError(c, err)
 		return
@@ -104,7 +124,12 @@ func (h *PetHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
-	if err := h.svc.Delete(id); err != nil {
+	ownerID, ok := accountIDFromToken(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token subject"})
+		return
+	}
+	if err := h.svc.Delete(id, ownerID); err != nil {
 		h.respondError(c, err)
 		return
 	}
@@ -125,4 +150,18 @@ func parseID(c *gin.Context) (uint, error) {
 		return 0, err
 	}
 	return uint(id), nil
+}
+
+// accountIDFromToken extracts the authenticated account id from JWT claims
+// (the "sub" claim) set by the auth middleware.
+func accountIDFromToken(c *gin.Context) (uint, bool) {
+	claims, ok := auth.ClaimsFrom(c)
+	if !ok {
+		return 0, false
+	}
+	id, err := strconv.ParseUint(claims.Subject, 10, 64)
+	if err != nil {
+		return 0, false
+	}
+	return uint(id), true
 }
